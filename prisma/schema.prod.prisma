@@ -1,6 +1,6 @@
+// Prisma schema для production (PostgreSQL)
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-// Основная схема для production (PostgreSQL/Railway)
 
 generator client {
   provider = "prisma-client-js"
@@ -8,26 +8,25 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Event {
-  id           String   @id @default(cuid())
+  id           String        @id @default(cuid())
   title        String
   description  String
   startDate    DateTime
   endDate      DateTime
-  slotDuration Int      // in minutes: 15, 30, or 60
-  createdAt    DateTime @default(now())
+  slotDuration Int
+  createdAt    DateTime      @default(now())
   participants Participant[]
 }
 
 model Participant {
-  id        String         @id @default(cuid())
-  eventId   String
-  event     Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name      String
-  createdAt DateTime       @default(now())
+  id           String         @id @default(cuid())
+  eventId      String
+  event        Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
+  createdAt    DateTime       @default(now())
   availability Availability[]
 }
 
@@ -36,5 +35,5 @@ model Availability {
   participantId String
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   slotTime      DateTime
-  status        String      // "available"
+  status        String
 }
