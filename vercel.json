@@ -1,1 +1,1 @@
-{ \"buildCommand\": \"prisma generate && prisma migrate deploy && next build\", \"framework\": \"nextjs\", \"regions\": [\"fra1\"] } 
+{\"buildCommand\":\"prisma generate ^&^& prisma migrate deploy ^&^& next build\",\"framework\":\"nextjs\"} 
