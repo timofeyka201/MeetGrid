@@ -145,6 +145,9 @@ export default function HomePage() {
           <p className="text-center text-gray-500 text-sm">
             MeetGrid — простой способ планировать встречи
           </p>
+          <p className="text-center text-gray-400 text-xs mt-2">
+            Creator: <a href="https://t.me/Kotletkad" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-500">@Kotletkad</a>
+          </p>
         </div>
       </footer>
     </div>
