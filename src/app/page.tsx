@@ -2,15 +2,15 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-green-600">MeetGrid</h1>
+            <h1 className="text-2xl font-bold text-blue-600">Termeet</h1>
             <Link
               href="/create"
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Создать событие
             </Link>
@@ -31,7 +31,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/create"
-              className="px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+              className="px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
             >
               Создать событие
             </Link>
@@ -41,9 +41,9 @@ export default function HomePage() {
         {/* Features */}
         <div className="mt-20 grid md:grid-cols-3 gap-8">
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -65,9 +65,9 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -89,9 +89,9 @@ export default function HomePage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-blue-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -129,7 +129,7 @@ export default function HomePage() {
                 key={item.step}
                 className="bg-white rounded-lg shadow-md p-6 text-center"
               >
-                <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
+                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
                   {item.step}
                 </div>
                 <p className="text-gray-700">{item.text}</p>
@@ -143,10 +143,10 @@ export default function HomePage() {
       <footer className="bg-white border-t mt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <p className="text-center text-gray-500 text-sm">
-            MeetGrid — простой способ планировать встречи
+            Termeet — простой способ планировать встречи
           </p>
           <p className="text-center text-gray-400 text-xs mt-2">
-            Creator: <a href="https://t.me/Kotletkad" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-500">@Kotletkad</a>
+            Creators: <a href="https://t.me/styleruorg" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-500">@styleruorg</a>
           </p>
         </div>
       </footer>

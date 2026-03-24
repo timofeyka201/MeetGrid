@@ -7,7 +7,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MeetGrid — Планирование встреч",
+  title: "Termeet — Планирование встреч",
   description: "Простой способ планировать встречи с друзьями и коллегами",
 };
 

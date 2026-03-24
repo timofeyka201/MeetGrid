@@ -235,18 +235,18 @@ export default function EventPage() {
 
   const getCellColor = (count: number, isSelected: boolean) => {
     if (isSelected) {
-      return "bg-green-500 border-green-600";
+      return "bg-blue-500 border-blue-600";
     }
     if (count === 0) {
-      return "bg-white border-gray-200 hover:bg-green-100";
+      return "bg-white border-gray-200 hover:bg-blue-100";
     }
     if (count <= 2) {
-      return "bg-green-200 border-green-300";
+      return "bg-blue-200 border-blue-300";
     }
     if (count <= 4) {
-      return "bg-green-400 border-green-500 text-white";
+      return "bg-blue-400 border-blue-500 text-white";
     }
-    return "bg-green-600 border-green-700 text-white";
+    return "bg-blue-600 border-blue-700 text-white";
   };
 
   const copyLink = () => {
@@ -298,11 +298,11 @@ export default function EventPage() {
 
           {/* Best Time */}
           {bestTime && (
-            <div className="mt-4 p-4 bg-green-50 rounded-md">
-              <p className="text-sm font-medium text-green-800">
+            <div className="mt-4 p-4 bg-blue-50 rounded-md">
+              <p className="text-sm font-medium text-blue-800">
         Лучшее время для встречи:
               </p>
-              <p className="text-lg font-bold text-green-900">
+              <p className="text-lg font-bold text-blue-900">
                 {new Date(bestTime.datetime).toLocaleDateString("ru-RU", {
                   weekday: "long",
                   day: "numeric",
@@ -330,19 +330,19 @@ export default function EventPage() {
               id="name"
               value={participantName}
               onChange={(e) => setParticipantName(e.target.value)}
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Введите ваше имя"
             />
             <button
               onClick={handleSaveAvailability}
               disabled={saving || selectedSlots.size === 0}
-              className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
           {saved && (
-            <p className="mt-2 text-sm text-green-600">
+            <p className="mt-2 text-sm text-blue-600">
               Ваша доступность сохранена!
             </p>
           )}
@@ -365,8 +365,8 @@ export default function EventPage() {
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 font-medium">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-medium">
                         {participant.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -469,19 +469,19 @@ export default function EventPage() {
                 <span className="text-sm text-gray-600">0 участников</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-green-200 border border-green-300 rounded"></div>
+                <div className="w-6 h-6 bg-blue-200 border border-blue-300 rounded"></div>
                 <span className="text-sm text-gray-600">1-2 участника</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-green-400 border border-green-500 rounded text-white text-xs flex items-center justify-center">3</div>
+                <div className="w-6 h-6 bg-blue-400 border border-blue-500 rounded text-white text-xs flex items-center justify-center">3</div>
                 <span className="text-sm text-gray-600">3-4 участника</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-green-600 border border-green-700 rounded text-white text-xs flex items-center justify-center">5</div>
+                <div className="w-6 h-6 bg-blue-600 border border-blue-700 rounded text-white text-xs flex items-center justify-center">5</div>
                 <span className="text-sm text-gray-600">5+ участников</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-green-500 border border-green-600 rounded"></div>
+                <div className="w-6 h-6 bg-blue-500 border border-blue-600 rounded"></div>
                 <span className="text-sm text-gray-600">Ваш выбор</span>
               </div>
             </div>
@@ -490,7 +490,7 @@ export default function EventPage() {
 
         {/* Footer */}
         <div className="mt-6 text-center">
-          <a href="/create" className="text-sm text-green-600 hover:text-green-500">
+          <a href="/create" className="text-sm text-blue-600 hover:text-blue-500">
             Создать своё событие
           </a>
         </div>
