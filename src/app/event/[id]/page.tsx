@@ -10,6 +10,8 @@ interface Event {
   startDate: string;
   endDate: string;
   slotDuration: number;
+  startTime: number;
+  endTime: number;
   participants: Participant[];
 }
 
@@ -65,11 +67,13 @@ export default function EventPage() {
     
     // Generate slots for each day
     const currentDate = new Date(startDate);
+    const startHour = event.startTime;
+    const endHour = event.endTime;
     while (currentDate <= endDate) {
-      // Generate slots for each day (9:00 to 21:00)
-      for (let hour = 9; hour <= 21; hour++) {
+      // Generate slots for each day (startTime to endTime)
+      for (let hour = startHour; hour <= endHour; hour++) {
         for (let minute = 0; minute < 60; minute += duration) {
-          if (hour === 21 && minute > 0) break; // Stop at 21:00
+          if (hour === endHour && minute > 0) break; // Stop at endTime
 
           const slotDate = new Date(currentDate);
           slotDate.setHours(hour, minute, 0, 0);

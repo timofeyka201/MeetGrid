@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, startDate, endDate, slotDuration } = body;
+    const { title, description, startDate, endDate, slotDuration, startTime, endTime } = body;
 
-    if (!title || !startDate || !endDate || !slotDuration) {
+    if (!title || !startDate || !endDate || !slotDuration || startTime === undefined || endTime === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         slotDuration: parseInt(slotDuration),
+        startTime: parseInt(startTime),
+        endTime: parseInt(endTime),
       },
     });
 
