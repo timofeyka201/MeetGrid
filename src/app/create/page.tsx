@@ -22,6 +22,7 @@ export default function CreateEventPage() {
       slotDuration: formData.get("slotDuration"),
       startTime: formData.get("startTime"),
       endTime: formData.get("endTime"),
+      meetingLink: formData.get("meetingLink"),
     };
 
     try {
@@ -90,6 +91,22 @@ export default function CreateEventPage() {
                 rows={3}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="Краткое описание события"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="meetingLink"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Ссылка на онлайн-встречу
+              </label>
+              <input
+                type="url"
+                name="meetingLink"
+                id="meetingLink"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Например: https://zoom.us/j/123456789"
               />
             </div>
 

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, description, startDate, endDate, slotDuration, startTime, endTime } = body;
+    const { title, description, startDate, endDate, slotDuration, startTime, endTime, meetingLink } = body;
 
     if (!title || !startDate || !endDate || !slotDuration || startTime === undefined || endTime === undefined) {
       return NextResponse.json(
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         slotDuration: parseInt(slotDuration),
         startTime: parseInt(startTime),
         endTime: parseInt(endTime),
+        meetingLink: meetingLink || null,
       },
     });
 

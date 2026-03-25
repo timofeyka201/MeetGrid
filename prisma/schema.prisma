@@ -19,6 +19,7 @@ model Event {
   slotDuration Int      // in minutes: 15, 30, or 60
   startTime    Int      @default(9) // start hour (0-23)
   endTime      Int      @default(21) // end hour (0-23)
+  meetingLink  String?  // ссылка на онлайн-встречу
   createdAt    DateTime @default(now())
   participants Participant[]
 }
