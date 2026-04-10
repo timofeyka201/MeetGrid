@@ -33,9 +33,8 @@ interface TimeSlot {
   date: string;
   time: string;
   datetime: string;
-  score: number;
+  count: number;
   isSelected: boolean;
-  userPriority: number;
 }
 
 interface BestTime {
