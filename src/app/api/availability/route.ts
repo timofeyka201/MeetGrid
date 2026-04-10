@@ -21,11 +21,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create availability records
-    const availabilityData = slots.map((slotTime: string) => ({
+    // Create availability records with priorities
+    const availabilityData = slots.map((slot: { datetime: string; priority: number }) => ({
       participantId: participant.id,
-      slotTime: new Date(slotTime),
+      slotTime: new Date(slot.datetime),
       status: "available",
+      priority: slot.priority || 1,
     }));
 
     await prisma.availability.createMany({

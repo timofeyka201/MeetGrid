@@ -33,14 +33,27 @@ interface TimeSlot {
   date: string;
   time: string;
   datetime: string;
-  count: number;
+  score: number;
   isSelected: boolean;
+  userPriority: number;
 }
 
 interface BestTime {
   datetime: string;
-  count: number;
+  score: number;
 }
+
+const PRIORITY_LABELS: Record<number, string> = {
+  1: "Очень удобно",
+  2: "Просто могу",
+  3: "На крайний случай",
+};
+
+const PRIORITY_SCORES: Record<number, number> = {
+  1: 3,
+  2: 2,
+  3: 1,
+};
 
 export default function EventPage() {
   const params = useParams();
@@ -50,7 +63,7 @@ export default function EventPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [participantName, setParticipantName] = useState("");
-  const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
+  const [selectedSlots, setSelectedSlots] = useState<Map<string, number>>(new Map());
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [bestTime, setBestTime] = useState<BestTime | null>(null);
@@ -60,6 +73,11 @@ export default function EventPage() {
     slotDatetime: string;
   } | null>(null);
   const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [priorityMenu, setPriorityMenu] = useState<{
+    x: number;
+    y: number;
+    slotDatetime: string;
+  } | null>(null);
 
   // Generate all time slots between start and end date
   const generateTimeSlots = useCallback(() => {
@@ -99,8 +117,8 @@ export default function EventPage() {
           });
           const datetimeStr = slotDate.toISOString();
 
-          // Count how many participants selected this slot
-          let count = 0;
+          // Calculate score based on participants' priorities
+          let score = 0;
           event.participants.forEach((p) => {
             p.availability.forEach((a) => {
               const aDate = new Date(a.slotTime);
@@ -111,7 +129,9 @@ export default function EventPage() {
                 aDate.getMonth() === currentDate.getMonth() &&
                 aDate.getFullYear() === currentDate.getFullYear()
               ) {
-                count++;
+                // Priority 1 = 3 points, 2 = 2 points, 3 = 1 point
+                const priority = a.priority || 1;
+                score += PRIORITY_SCORES[priority] || 1;
               }
             });
           });
@@ -120,8 +140,9 @@ export default function EventPage() {
             date: dateStr,
             time: timeStr,
             datetime: datetimeStr,
-            count,
+            score,
             isSelected: false,
+            userPriority: 0,
           });
         }
       }
@@ -170,32 +191,95 @@ export default function EventPage() {
       const slots = generateTimeSlots();
       setTimeSlots(slots);
 
-      // Find best time
+      // Find best time by score
       if (slots.length > 0) {
         const maxSlot = slots.reduce((max, slot) =>
-          slot.count > max.count ? slot : max
+          slot.score > max.score ? slot : max
         );
-        if (maxSlot.count > 0) {
+        if (maxSlot.score > 0) {
           setBestTime({
             datetime: maxSlot.datetime,
-            count: maxSlot.count,
+            score: maxSlot.score,
           });
         }
       }
     }
   }, [event, generateTimeSlots]);
 
-  const toggleSlot = (datetime: string) => {
+  const removeSlot = (datetime: string) => {
     setSelectedSlots((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(datetime)) {
-        newSet.delete(datetime);
-      } else {
-        newSet.add(datetime);
-      }
-      return newSet;
+      const newMap = new Map(prev);
+      newMap.delete(datetime);
+      
+      // Update timeSlots to reflect removal
+      setTimeSlots((prevSlots) =>
+        prevSlots.map((slot) =>
+          slot.datetime === datetime
+            ? { ...slot, isSelected: false, userPriority: 0 }
+            : slot
+        )
+      );
+      return newMap;
     });
   };
+
+  const addSlotWithPriority = (datetime: string, priority: number) => {
+    setSelectedSlots((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(datetime, priority);
+      
+      // Update timeSlots to reflect addition
+      setTimeSlots((prevSlots) =>
+        prevSlots.map((slot) =>
+          slot.datetime === datetime
+            ? { ...slot, isSelected: true, userPriority: priority }
+            : slot
+        )
+      );
+      return newMap;
+    });
+    setPriorityMenu(null);
+  };
+
+  const handlePrioritySelect = (datetime: string, priority: number) => {
+    addSlotWithPriority(datetime, priority);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, datetime: string) => {
+    e.preventDefault();
+    setPriorityMenu({
+      x: e.clientX,
+      y: e.clientY,
+      slotDatetime: datetime,
+    });
+  };
+
+  const handleTouchStart = (datetime: string) => {
+    const timeout = setTimeout(() => {
+      setPriorityMenu({
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        slotDatetime: datetime,
+      });
+    }, 500); // 500ms long press
+    setTouchTimeout(timeout);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimeout) {
+      clearTimeout(touchTimeout);
+      setTouchTimeout(null);
+    }
+  };
+
+  // Close priority menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setPriorityMenu(null);
+    if (priorityMenu) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [priorityMenu]);
 
   const handleSaveAvailability = async () => {
     if (!participantName.trim()) {
@@ -212,13 +296,18 @@ export default function EventPage() {
     setError("");
 
     try {
+      // Convert Map to array of { datetime, priority }
+      const slotsWithPriority = Array.from(selectedSlots.entries()).map(
+        ([datetime, priority]) => ({ datetime, priority })
+      );
+
       const response = await fetch("/api/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventId,
           participantName: participantName.trim(),
-          slots: Array.from(selectedSlots),
+          slots: slotsWithPriority,
         }),
       });
 
@@ -228,8 +317,8 @@ export default function EventPage() {
       }
 
       setSaved(true);
-      setSelectedSlots(new Set());
-      
+      setSelectedSlots(new Map());
+
       // Reload event data to show updated heatmap
       const updatedEvent = await fetch(`/api/event?id=${eventId}`);
       const eventData = await updatedEvent.json();
@@ -241,17 +330,20 @@ export default function EventPage() {
     }
   };
 
-  const getCellColor = (count: number, isSelected: boolean) => {
+  const getCellColor = (score: number, isSelected: boolean, userPriority: number) => {
     if (isSelected) {
-      return "bg-blue-500 border-blue-600";
+      // Color based on user's priority
+      if (userPriority === 1) return "bg-green-500 border-green-600";
+      if (userPriority === 2) return "bg-yellow-500 border-yellow-600";
+      return "bg-orange-500 border-orange-600";
     }
-    if (count === 0) {
+    if (score === 0) {
       return "bg-white border-gray-200 hover:bg-blue-100";
     }
-    if (count <= 2) {
+    if (score <= 3) {
       return "bg-blue-200 border-blue-300";
     }
-    if (count <= 4) {
+    if (score <= 6) {
       return "bg-blue-400 border-blue-500 text-white";
     }
     return "bg-blue-600 border-blue-700 text-white";
@@ -323,7 +415,7 @@ export default function EventPage() {
           {bestTime && (
             <div className="mt-4 p-4 bg-blue-50 rounded-md">
               <p className="text-sm font-medium text-blue-800">
-        Лучшее время для встречи:
+                Лучшее время для встречи:
               </p>
               <p className="text-lg font-bold text-blue-900">
                 {new Date(bestTime.datetime).toLocaleDateString("ru-RU", {
@@ -333,7 +425,7 @@ export default function EventPage() {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}{" "}
-                ({bestTime.count} {bestTime.count === 1 ? "участник" : bestTime.count < 5 ? "участника" : "участников"})
+                ({bestTime.score} {bestTime.score === 1 ? "балл" : bestTime.score < 5 ? "балла" : "баллов"})
               </p>
             </div>
           )}
@@ -459,19 +551,32 @@ export default function EventPage() {
                       );
                       if (!slot) return null;
 
+                      const isSelected = selectedSlots.has(slot.datetime);
+
                       return (
                         <button
                           key={`${date}-${time}`}
-                          onClick={() => toggleSlot(slot.datetime)}
+                          onClick={() => {
+                            if (isSelected) {
+                              removeSlot(slot.datetime);
+                            } else {
+                              // Default add with priority 1
+                              addSlotWithPriority(slot.datetime, 1);
+                            }
+                          }}
+                          onContextMenu={(e) => handleContextMenu(e, slot.datetime)}
+                          onTouchStart={() => handleTouchStart(slot.datetime)}
+                          onTouchEnd={handleTouchEnd}
                           className={`h-10 rounded border transition-colors ${getCellColor(
-                            slot.count,
-                            selectedSlots.has(slot.datetime)
+                            slot.score,
+                            isSelected,
+                            slot.userPriority
                           )}`}
-                          title={`${date} ${time} - ${slot.count} участников`}
+                          title={`${date} ${time} - ${slot.score} баллов`}
                         >
-                          {slot.count > 0 && (
+                          {slot.score > 0 && (
                             <span className="text-xs font-medium">
-                              {slot.count}
+                              {slot.score}
                             </span>
                           )}
                         </button>
@@ -489,23 +594,34 @@ export default function EventPage() {
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-white border border-gray-200 rounded"></div>
-                <span className="text-sm text-gray-600">0 участников</span>
+                <span className="text-sm text-gray-600">0 баллов</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-blue-200 border border-blue-300 rounded"></div>
-                <span className="text-sm text-gray-600">1-2 участника</span>
+                <span className="text-sm text-gray-600">1-3 балла</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-400 border border-blue-500 rounded text-white text-xs flex items-center justify-center">3</div>
-                <span className="text-sm text-gray-600">3-4 участника</span>
+                <div className="w-6 h-6 bg-blue-400 border border-blue-500 rounded text-white text-xs flex items-center justify-center">4</div>
+                <span className="text-sm text-gray-600">4-6 баллов</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-600 border border-blue-700 rounded text-white text-xs flex items-center justify-center">5</div>
-                <span className="text-sm text-gray-600">5+ участников</span>
+                <div className="w-6 h-6 bg-blue-600 border border-blue-700 rounded text-white text-xs flex items-center justify-center">7</div>
+                <span className="text-sm text-gray-600">7+ баллов</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mt-3 mb-2">Приоритеты (правый клик / долгое нажатие):</p>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-green-500 border border-green-600 rounded"></div>
+                <span className="text-sm text-gray-600">Очень удобно (3 балла)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-500 border border-blue-600 rounded"></div>
-                <span className="text-sm text-gray-600">Ваш выбор</span>
+                <div className="w-6 h-6 bg-yellow-500 border border-yellow-600 rounded"></div>
+                <span className="text-sm text-gray-600">Просто могу (2 балла)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-orange-500 border border-orange-600 rounded"></div>
+                <span className="text-sm text-gray-600">На крайний случай (1 балл)</span>
               </div>
             </div>
           </div>
@@ -518,6 +634,58 @@ export default function EventPage() {
           </a>
         </div>
       </div>
+
+      {/* Priority Context Menu */}
+      {priorityMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setPriorityMenu(null)}
+          />
+          <div
+            className="fixed z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[200px]"
+            style={{
+              left: Math.min(priorityMenu.x, window.innerWidth - 220),
+              top: Math.min(priorityMenu.y, window.innerHeight - 180),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-3 py-2 border-b border-gray-100">
+              <p className="text-xs font-medium text-gray-500">Выберите приоритет:</p>
+            </div>
+            <button
+              onClick={() => handlePrioritySelect(priorityMenu.slotDatetime, 1)}
+              className="w-full px-4 py-3 text-left hover:bg-green-50 flex items-center gap-3 transition-colors"
+            >
+              <div className="w-4 h-4 rounded-full bg-green-500"></div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Очень удобно</p>
+                <p className="text-xs text-gray-500">3 балла</p>
+              </div>
+            </button>
+            <button
+              onClick={() => handlePrioritySelect(priorityMenu.slotDatetime, 2)}
+              className="w-full px-4 py-3 text-left hover:bg-yellow-50 flex items-center gap-3 transition-colors"
+            >
+              <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Просто могу</p>
+                <p className="text-xs text-gray-500">2 балла</p>
+              </div>
+            </button>
+            <button
+              onClick={() => handlePrioritySelect(priorityMenu.slotDatetime, 3)}
+              className="w-full px-4 py-3 text-left hover:bg-orange-50 flex items-center gap-3 transition-colors"
+            >
+              <div className="w-4 h-4 rounded-full bg-orange-500"></div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">На крайний случай</p>
+                <p className="text-xs text-gray-500">1 балл</p>
+              </div>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
