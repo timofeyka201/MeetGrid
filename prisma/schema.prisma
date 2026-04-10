@@ -35,5 +35,6 @@ model Availability {
   participantId String
   slotTime      DateTime
   status        String
+  priority      Int         @default(1)
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 }

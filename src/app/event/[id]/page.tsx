@@ -26,14 +26,16 @@ interface Availability {
   id: string;
   slotTime: string;
   status: string;
+  priority: number;
 }
 
 interface TimeSlot {
   date: string;
   time: string;
   datetime: string;
-  count: number;
+  score: number;
   isSelected: boolean;
+  userPriority: number;
 }
 
 interface BestTime {
@@ -53,6 +55,12 @@ export default function EventPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [bestTime, setBestTime] = useState<BestTime | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    slotDatetime: string;
+  } | null>(null);
+  const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Generate all time slots between start and end date
   const generateTimeSlots = useCallback(() => {
